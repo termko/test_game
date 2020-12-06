@@ -37,10 +37,8 @@ char *ft_strdup(char *str)
 
 void fire_warrior(t_player *p)
 {
-	t_warrior *tmp;
-	t_warrior *tmp2;
-	int i;
-	int action;
+	t_warrior *tmp,*tmp2;
+	int i, action;
 
 	while (1)
 	{
@@ -164,9 +162,7 @@ void init_army(t_player *p)
 	{
 		printf("You have %d gold and %d warriors. What do you want to do?!\n", p->gold, p->warrior_count);
 		if (p->warrior_count)
-		{
 			printf("[0] -> Fire a warrior. (Get all your gold back!)\n");
-		}
 		printf("[1] -> Buy a warrior! (All prices and stats will be displayed)\n");
 		printf("[2] -> Finish your army and go fight!\n");
 		scanf("%d", &action);
@@ -203,18 +199,58 @@ t_player *init_player()
 	scanf("%s", tmp);
 	p->name = ft_strdup(tmp);
 	init_army(p);
+	return p;
 }
 
-void fight(t_player *p1, t_player *p2)
-{
-	
+int fight(t_player *p1, t_player *p2) {
+	t_warrior *w1, *w2, *tmp;
+	int action;
+
+	w1 = p1->warriors;
+	w2 = p2->warriors;
+	while (p1->warrior_count && p2->warrior_count)
+	{
+		while (w1->hp > 0 && w2->hp > 0)
+		{
+			w2->hp -= w1->atk;
+			w1->hp -= w2->atk;
+		}
+		if (w2->hp <= 0 && w1->hp <= 0)
+			printf("DOUBLE KILL!!! Warriors killed themselves!\n");
+		if (w2->hp <= 0)
+		{
+			printf("%s killed on %s's side!\n", w2->name, p2->name);
+			tmp = w2->next;
+			free(w2->name);
+			free(w2);
+			w2 = tmp;
+			p2->warrior_count--;
+		}
+		if (w1->hp <= 0)
+		{
+			printf("%s killed on %s's side!\n", w1->name, p1->name);
+			tmp = w1->next;
+			free(w1->name);
+			free(w1);
+			w1 = tmp;
+			p1->warrior_count--;
+		}
+	}
+	if (p1->warrior_count)
+		printf("%s IS THE WINNER! %s, better luck next time!\n", p1->name, p2->name);
+	else if (p2->warrior_count)
+		printf("%s IS THE WINNER! %s, better luck next time!\n", p2->name, p1->name);
+	else
+		printf("BOTH PLAYERS LOST THEIR SOLDIERS! OMG!\n");
+	printf("Play again? (0/1)\n");
+	scanf("%d", &action);
+	return action;
 }
 
 int main() {
-	t_player *p1;
-	t_player *p2;
+	t_player *p1, *p2;
 
 	p1 = init_player();
 	p2 = init_player();
-	fight(p1, p2);
+	while (fight(p1, p2));
 }
