@@ -128,25 +128,31 @@ void buy_warrior(t_player *p)
 				hp = 50;
 				atk = 10;
 				cost = 500;
-				name = ft_strdup("Fighter");
+				check_malloc(name = ft_strdup("Fighter"));
 				break;
 			case 1:
 				hp = 35;
 				atk = 20;
 				cost = 1000;
-				name = ft_strdup("Ranger");
+				check_malloc(name = ft_strdup("Ranger"));
 				break;
 			case 2:
 				hp = 25;
 				atk = 25;
 				cost = 1500;
-				name = ft_strdup("Mage");
+				check_malloc(name = ft_strdup("Mage"));
 				break;
 			default:
 				printf("Wrong number! Please try again!\n\n");
 		}
 		if (hp && atk && cost)
 		{
+			if (cost > p->gold)
+			{
+				printf("Insufficient gold!\n\n");
+				free(name);
+				return;
+			}
 			p->gold -= cost;
 			p->warrior_count++;
 			create_warrior(p, hp, atk, cost, name);
@@ -247,10 +253,21 @@ int fight(t_player *p1, t_player *p2) {
 	return action;
 }
 
+void free_fighters(t_player **p1, t_player **p2)
+{
+	free((*p1)->name);
+	free((*p2)->name);
+	free(*p1);
+	free(*p2);
+	*p1 = NULL;
+	*p2 = NULL;
+}
+
 int main() {
 	t_player *p1, *p2;
 
 	p1 = init_player();
 	p2 = init_player();
-	while (fight(p1, p2));
+	while (fight(p1, p2))
+		free_fighters(&p1, &p2);
 }
